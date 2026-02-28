@@ -1,12 +1,7 @@
-// src/bot.ts
 import { Telegraf, Markup } from "telegraf";
-import { registerClient } from "./api";
+import { registerClient, sendChatMessage } from "./api";
 
 export const bot = new Telegraf(process.env.BOT_TOKEN!);
-
-bot.telegram.setMyCommands([
-  { command: "start", description: "Запустить бота 🚀" },
-]);
 
 bot.start(async (ctx) => {
   if (!ctx.from) return;
@@ -48,4 +43,31 @@ bot.start(async (ctx) => {
   } catch (error) {
     console.error('Failed to set chat menu button:', error);
   }
+});
+
+// Photo handler
+bot.on("photo", async (ctx) => {
+  if (!ctx.from) return;
+  const photo = ctx.message.photo[ctx.message.photo.length - 1];
+  const fileLink = await ctx.telegram.getFileLink(photo.file_id);
+  
+  await sendChatMessage({
+    telegramId: ctx.from.id,
+    text: ctx.message.caption || "",
+    imageUrl: fileLink.toString(),
+  });
+  
+  await ctx.reply("✅ Фото получено и передано оператору.");
+});
+
+// Text handler
+bot.on("message", async (ctx) => {
+  if (!ctx.from || !("text" in ctx.message)) return;
+  
+  await sendChatMessage({
+    telegramId: ctx.from.id,
+    text: ctx.message.text,
+  });
+  
+  await ctx.reply("✅ Ваше сообщение передано оператору.");
 });
