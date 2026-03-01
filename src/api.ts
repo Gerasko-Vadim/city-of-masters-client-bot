@@ -56,6 +56,6 @@ export async function completeOrder(
     telegramId,
   });
   return response.data;
+}export async function sendChatMessage(data: { telegramId: number; text?: string; imageUrl?: string }): Promise<void> {
+  await api.post('chat/client-send', data);
 }
-
-
