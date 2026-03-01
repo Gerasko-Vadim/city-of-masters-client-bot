@@ -48,26 +48,32 @@ bot.start(async (ctx) => {
 // Photo handler
 bot.on("photo", async (ctx) => {
   if (!ctx.from) return;
-  const photo = ctx.message.photo[ctx.message.photo.length - 1];
-  const fileLink = await ctx.telegram.getFileLink(photo.file_id);
-  
-  await sendChatMessage({
-    telegramId: ctx.from.id,
-    text: ctx.message.caption || "",
-    imageUrl: fileLink.toString(),
-  });
-  
-  await ctx.reply("✅ Фото получено и передано оператору.");
+  try {
+    const photo = ctx.message.photo[ctx.message.photo.length - 1];
+    const fileLink = await ctx.telegram.getFileLink(photo.file_id);
+    await sendChatMessage({
+      telegramId: ctx.from.id,
+      text: ctx.message.caption || "",
+      imageUrl: fileLink.toString(),
+    });
+    await ctx.reply("✅ Фото получено и передано оператору.");
+  } catch (error) {
+    console.error("Failed to send photo message:", error);
+    await ctx.reply("❌ Не удалось отправить фото. Попробуйте ещё раз.");
+  }
 });
 
 // Text handler
 bot.on("message", async (ctx) => {
   if (!ctx.from || !("text" in ctx.message)) return;
-  
-  await sendChatMessage({
-    telegramId: ctx.from.id,
-    text: ctx.message.text,
-  });
-  
-  await ctx.reply("✅ Ваше сообщение передано оператору.");
+  try {
+    await sendChatMessage({
+      telegramId: ctx.from.id,
+      text: ctx.message.text,
+    });
+    await ctx.reply("✅ Ваше сообщение передано оператору.");
+  } catch (error) {
+    console.error("Failed to send text message:", error);
+    await ctx.reply("❌ Не удалось отправить сообщение. Попробуйте ещё раз.");
+  }
 });
